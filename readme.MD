@@ -2,7 +2,13 @@
 
 ![alt text](images/vpc.jpg)
 
-This module is going to create the following resources. for HA we are going to get first 2 AZ.
+
+
+# AWS VPC Architecture with Multi-AZ, Subnets, Routing, and Peering
+
+## Overview
+
+This project sets up an AWS Virtual Private Cloud (VPC) using Terraform. The architecture is designed for high availability and secure networking. It includes:
 
 * VPC
 * Internet Gateway associated with VPC
@@ -19,6 +25,74 @@ This module is going to create the following resources. for HA we are going to g
 * Route table associations with subnets
 * Peering with default VPC(if Required)
 * Peering routes in acceptor and requestor route tables
+
+---
+
+## VPC and Subnet Structure
+
+- VPC Name: `expense-dev-vpc`
+- Total Subnets: 6
+  - 2 Public Subnets (for Frontend)
+  - 2 Private Subnets (for Backend)
+  - 2 Private Subnets (for Database)
+- Availability Zones: Spread across 2 Availability Zones (e.g., `us-east-1a` and `us-east-1b`)
+
+---
+
+## Internet Connectivity
+
+- Public Subnets:
+  - Frontend services are deployed here.
+  - Connected to the Internet via an Internet Gateway.
+
+- Private Subnets (Backend and Database):
+  - Cannot access the Internet directly.
+  - Outbound internet access is provided through a NAT Gateway located in one of the public subnets.
+  - The NAT Gateway uses an Elastic IP.
+  - Route Tables are configured to send private subnet traffic to the NAT Gateway.
+
+---
+
+## VPC Peering
+
+- A VPC Peering connection is created between the custom VPC (`expense-dev-vpc`) and the default VPC.
+- Route tables are updated for bidirectional communication between the subnets of both VPCs.
+- This allows secure, internal communication between all subnets.
+
+---
+
+## Route Tables and Routes
+
+- Public Route Table:
+  - Routes internet-bound traffic (`0.0.0.0/0`) to the Internet Gateway.
+  - Contains local routes for VPC-internal communication.
+  - Routes to the default VPC subnets through the peering connection.
+
+- Private Route Tables (Backend and Database):
+  - Routes internet-bound traffic (`0.0.0.0/0`) to the NAT Gateway.
+  - Local route for internal VPC communication.
+  - Routes to the default VPC subnets through the peering connection.
+
+- Database Subnets:
+  - No internet access.
+  - Only local and peering routes for internal, restricted access.
+
+---
+
+## Security and Design Highlights
+
+- Frontend services are hosted in public subnets and accessible from the internet.
+- Backend and database services are isolated in private subnets with no direct internet access.
+- NAT Gateway allows private subnets to reach the internet securely without exposing them.
+- Peering connection enables safe, bidirectional communication with the default VPC.
+- All subnets are distributed across two Availability Zones for high availability and redundancy.
+
+---
+
+## Summary
+
+This setup provides a secure and scalable AWS network architecture. It separates public-facing services from internal logic and data layers, ensures controlled traffic flow with route tables and NAT, and allows secure cross-VPC communication using peering.
+
 
 # Inputs
 * project_name (Mandatory): User must supply their project name.
