@@ -74,7 +74,7 @@ This project sets up an AWS Virtual Private Cloud (VPC) using Terraform. The arc
   - Routes to the default VPC subnets through the peering connection.
 
 - Database Subnets:
-  - No internet access.
+  - No direct internet access (outbound via NAT only).
   - Only local and peering routes for internal, restricted access.
 
 ---
